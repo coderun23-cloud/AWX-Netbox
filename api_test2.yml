@@ -15,10 +15,10 @@
           Accept: "application/json; indent=4"
       register: netbox_status
 
-    - name: Display NetBox and Server Information
+ - name: Display NetBox and Server Information
       debug:
         msg:
           - "Successfully connected to NetBox!"
           - "NetBox Version: {{ netbox_status.json['netbox-version'] }}"
-          - "Target Server IP: {{ ansible_default_ipv4.address }}"
+          - "Server IP Addresses: {{ ansible_all_ipv4_addresses | join(', ') }}"
           - "Running on Hostname: {{ inventory_hostname }}"
