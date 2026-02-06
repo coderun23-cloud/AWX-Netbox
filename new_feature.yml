@@ -3,7 +3,6 @@
   hosts: all
   gather_facts: no
   vars:
-    # Defining these here makes the playbook easier to maintain
     netbox_url: "http://10.201.6.37:8000"
     netbox_token: "nbt_iPhxAmW1x8rK.zA2u8f3d1c6STZAtMubFhGe39aOnAsIkcKIlDZ4W"
 
@@ -19,27 +18,45 @@
           Content-Type: "application/json"
       register: netbox_status
 
-    - name: 2. Collect Execution Environment Metadata
+    - name: 2. Fetch Specific Device Details from NetBox
+      ansible.builtin.uri:
+        # Search for the device by the name it has in AWX
+        url: "{{ netbox_url }}/api/dcim/devices/?name={{ inventory_hostname }}"
+        method: GET
+        status_code: 200
+        headers:
+          Authorization: "Token {{ netbox_token }}"
+          Content-Type: "application/json"
+      register: device_query
+
+    - name: 3. Set Facts for Display
       ansible.builtin.set_fact:
+        # We take the first result [0] from the API query
+        nb_role: "{{ device_query.json.results[0].role.name | default('N/A') }}"
+        nb_manu: "{{ device_query.json.results[0].device_type.manufacturer.name | default('N/A') }}"
+        nb_type: "{{ device_query.json.results[0].device_type.model | default('N/A') }}"
         awx_pod_name: "{{ lookup('env', 'HOSTNAME') | default('Unknown Pod', true) }}"
         target_ip: "{{ ansible_host | default('No IP in Inventory', true) }}"
 
-    - name: 3. Display Foundation Report
+    - name: 4. Display Enhanced Foundation Report
       ansible.builtin.debug:
         msg:
           - "============================================"
           - "       INFRASTRUCTURE FOUNDATION REPORT      "
           - "============================================"
           - "DEVICE CAPTURE:"
-          - "  Target Name:    {{ inventory_hostname }}"
-          - "  Inventory IP:   {{ target_ip }}"
+          - "  Target Name:     {{ inventory_hostname }}"
+          - "  Inventory IP:    {{ target_ip }}"
+          - "  Manufacturer:    {{ nb_manu }}"
+          - "  Device Model:    {{ nb_type }}"
+          - "  NetBox Role:     {{ nb_role }}"
           - ""
           - "SOURCE OF TRUTH (NETBOX):"
-          - "  API Status:     Connected (200 OK)"
-          - "  NetBox Version: {{ netbox_status.json['netbox-version'] }}"
-          - "  API Latency:    {{ netbox_status.elapsed }} seconds"
+          - "  API Status:      Connected (200 OK)"
+          - "  NetBox Version:  {{ netbox_status.json['netbox-version'] }}"
+          - "  API Latency:     {{ netbox_status.elapsed }} seconds"
           - ""
           - "AUTOMATION CONTEXT:"
-          - "  Execution Node: {{ awx_pod_name }}"
-          - "  Controller:     AWX on K3s (Local Cluster)"
+          - "  Execution Node:  {{ awx_pod_name }}"
+          - "  Controller:      AWX on K3s (Local Cluster)"
           - "============================================"
