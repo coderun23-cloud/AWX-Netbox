@@ -1,0 +1,45 @@
+---
+- name: Consolidation - Strong Foundation Playbook
+  hosts: all
+  gather_facts: no
+  vars:
+    # Defining these here makes the playbook easier to maintain
+    netbox_url: "http://10.201.6.37:8000"
+    netbox_token: "nbt_iPhxAmW1x8rK.zA2u8f3d1c6STZAtMubFhGe39aOnAsIkcKIlDZ4W"
+
+  tasks:
+    - name: 1. Verify NetBox API Reachability
+      ansible.builtin.uri:
+        url: "{{ netbox_url }}/api/status/"
+        method: GET
+        status_code: 200
+        validate_certs: false
+        headers:
+          Authorization: "Token {{ netbox_token }}"
+          Content-Type: "application/json"
+      register: netbox_status
+
+    - name: 2. Collect Execution Environment Metadata
+      ansible.builtin.set_fact:
+        awx_pod_name: "{{ lookup('env', 'HOSTNAME') | default('Unknown Pod', true) }}"
+        target_ip: "{{ ansible_host | default('No IP in Inventory', true) }}"
+
+    - name: 3. Display Foundation Report
+      ansible.builtin.debug:
+        msg:
+          - "============================================"
+          - "       INFRASTRUCTURE FOUNDATION REPORT      "
+          - "============================================"
+          - "DEVICE CAPTURE:"
+          - "  Target Name:    {{ inventory_hostname }}"
+          - "  Inventory IP:   {{ target_ip }}"
+          - ""
+          - "SOURCE OF TRUTH (NETBOX):"
+          - "  API Status:     Connected (200 OK)"
+          - "  NetBox Version: {{ netbox_status.json['netbox-version'] }}"
+          - "  API Latency:    {{ netbox_status.elapsed }} seconds"
+          - ""
+          - "AUTOMATION CONTEXT:"
+          - "  Execution Node: {{ awx_pod_name }}"
+          - "  Controller:     AWX on K3s (Local Cluster)"
+          - "============================================"
