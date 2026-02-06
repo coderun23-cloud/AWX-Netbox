@@ -1,0 +1,8 @@
+---
+- name: Test NetBox Connection
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Print Hello
+      debug:
+        msg: "Hello World! AWX found host {{ inventory_hostname }} in NetBox"
