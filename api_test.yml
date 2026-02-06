@@ -12,7 +12,7 @@
         validate_certs: false
         headers:
           # Use 'Bearer' instead of 'Token'
-          Authorization: "Bearer nbt_obgsRD0s8Pgf.s0QNZg3Lnorh504em2uxxg9it829ATKGZztL9pQ"
+          Authorization: "Bearer nbt_obgsRD0s8Pgf.s0QNZg3Lnorh504em2uxxg9it829ATKGZztL9pQ8"
           Content-Type: "application/json"
           Accept: "application/json; indent=4"
       register: netbox_status
