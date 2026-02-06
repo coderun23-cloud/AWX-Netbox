@@ -1,27 +1,22 @@
 ---
-- name: Test NetBox API Connection
+- name: Pull Device IP from NetBox
   hosts: all
   gather_facts: no
   tasks:
-    - name: Get Server IP manually
-      ansible.builtin.shell: "ip route get 1.1.1.1 | awk '{print $7}'"
-      register: server_ip_result
-
-    - name: Get NetBox Status from API
+    - name: Search NetBox for IP of this device
       ansible.builtin.uri:
-        url: "http://10.201.6.37:8000/api/status/"
+        # We query the IP addresses endpoint filtered by the device name
+        url: "http://10.201.6.37:8000/api/ipam/ip-addresses/?address=10.201.6.37"
         method: GET
         status_code: 200
         validate_certs: false
         headers:
-          Authorization: "Bearer nbt_iPhxAmW1x8rK.zA2u8f3d1c6STZAtMubFhGe39aOnAsIkcKIlDZ4W"
+          Authorization: "Token nbt_iPhxAmW1x8rK.zA2u8f3d1c6STZAtMubFhGe39aOnAsIkcKIlDZ4W"
           Content-Type: "application/json"
-          Accept: "application/json; indent=4"
-      register: netbox_status
+      register: netbox_ip_data
 
-    - name: Display NetBox and Server Information
+    - name: Display the IP from NetBox
       debug:
         msg:
-          - "Successfully connected to NetBox!"
-          - "NetBox Version: {{ netbox_status.json['netbox-version'] }}"
-          - "Server IP Address: {{ server_ip_result.stdout | trim }}"
+          - "Successfully reached NetBox!"
+          - "The IP address found in NetBox is: {{ netbox_ip_data.json.results[0].address }}"
