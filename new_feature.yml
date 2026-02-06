@@ -20,7 +20,6 @@
 
     - name: 2. Fetch Specific Device Details from NetBox
       ansible.builtin.uri:
-        # Added | urlencode to handle the space in "Netbox Host"
         url: "{{ netbox_url }}/api/dcim/devices/?name={{ inventory_hostname | urlencode }}"
         method: GET
         status_code: 200
@@ -29,16 +28,21 @@
           Content-Type: "application/json"
       register: device_query
 
-    - name: 3. Set Facts for Display
+    - name: 3. DEBUG - Show API Results
+      ansible.builtin.debug:
+        msg: 
+          - "Searching NetBox for: {{ inventory_hostname }}"
+          - "Found Devices Count: {{ device_query.json.count }}"
+
+    - name: 4. Set Facts for Display
       ansible.builtin.set_fact:
-        # Check if we actually found a result to avoid "list index out of range"
-        nb_role: "{{ device_query.json.results[0].role.name | default('Not Found') if device_query.json.count > 0 else 'No Match in NetBox' }}"
-        nb_manu: "{{ device_query.json.results[0].device_type.manufacturer.name | default('N/A') if device_query.json.count > 0 else 'N/A' }}"
-        nb_type: "{{ device_query.json.results[0].device_type.model | default('N/A') if device_query.json.count > 0 else 'N/A' }}"
+        nb_role: "{{ device_query.json.results[0].role.name | default('Data Missing') if device_query.json.count > 0 else 'Name Mismatch in NetBox' }}"
+        nb_manu: "{{ device_query.json.results[0].device_type.manufacturer.name | default('Data Missing') if device_query.json.count > 0 else 'Name Mismatch in NetBox' }}"
+        nb_type: "{{ device_query.json.results[0].device_type.model | default('Data Missing') if device_query.json.count > 0 else 'Name Mismatch in NetBox' }}"
         awx_pod_name: "{{ lookup('env', 'HOSTNAME') | default('Unknown Pod', true) }}"
         target_ip: "{{ ansible_host | default('No IP in Inventory', true) }}"
 
-    - name: 4. Display Enhanced Foundation Report
+    - name: 5. Display Enhanced Foundation Report
       ansible.builtin.debug:
         msg:
           - "============================================"
