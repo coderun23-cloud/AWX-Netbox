@@ -1,0 +1,18 @@
+---
+- name: Test NetBox API Connection
+  hosts: all
+  gather_facts: no
+  tasks:  # <--- Make sure this is the only "tasks:" line!
+    - name: Get NetBox Status from API
+      ansible.builtin.uri:
+        url: "http://10.201.6.36/api/status/"
+        method: GET
+        status_code: 200
+        validate_certs: false  # <--- ADD THIS LINE
+        headers:
+          Authorization: "Token {{ lookup('env', 'NETBOX_TOKEN') }}"
+      register: netbox_status
+
+    - name: Display NetBox Information
+      debug:
+        msg: "NetBox Version: {{ netbox_status.json['netbox-version'] }}"

@@ -6,19 +6,4 @@
     - name: Print Hello
       debug:
         msg: "Hello World! AWX found host {{ inventory_hostname }} in NetBox"
-  tasks:
-    - name: Get NetBox Status from API
-      ansible.builtin.uri:
-        url: "http://10.201.6.36/api/status/"
-        method: GET
-        status_code: 200
-        headers:
-          Authorization: "s0QNZg3Lnorh504em2uxxg9it829ATKGZztL9pQ8"
-      register: netbox_status
 
-    - name: Display NetBox Information
-      debug:
-        msg:
-          - "Successfully connected to NetBox!"
-          - "NetBox Version: {{ netbox_status.json['netbox-version'] }}"
-          - "Redis Status: {{ netbox_status.json['redis-status'] }}"
