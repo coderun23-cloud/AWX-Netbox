@@ -2,17 +2,23 @@
 - name: Test NetBox API Connection
   hosts: all
   gather_facts: no
-  tasks:  # <--- Make sure this is the only "tasks:" line!
+  tasks:
     - name: Get NetBox Status from API
       ansible.builtin.uri:
-        url: "http://10.201.6.36/api/status/"
+        # Use the exact URL and Port from your curl command
+        url: "http://10.201.106.107:8000/api/status/"
         method: GET
         status_code: 200
-        validate_certs: false  # <--- ADD THIS LINE
+        validate_certs: false
         headers:
-          Authorization: "Token {{ lookup('env', 'NETBOX_TOKEN') }}"
+          # Use 'Bearer' instead of 'Token'
+          Authorization: "Bearer nbt_obgsRD0s8Pgf.s0QNZg3Lnorh504em2uxxg9it829ATKGZztL9pQ8"
+          Content-Type: "application/json"
+          Accept: "application/json; indent=4"
       register: netbox_status
 
     - name: Display NetBox Information
       debug:
-        msg: "NetBox Version: {{ netbox_status.json['netbox-version'] }}"
+        msg:
+          - "Successfully connected to NetBox!"
+          - "NetBox Version: {{ netbox_status.json['netbox-version'] }}"
