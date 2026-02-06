@@ -1,7 +1,7 @@
 ---
 - name: Test NetBox API Connection
   hosts: all
-  gather_facts: yes  # Set this to yes to automatically collect IP information
+  gather_facts: yes
   tasks:
     - name: Get NetBox Status from API
       ansible.builtin.uri:
@@ -15,10 +15,9 @@
           Accept: "application/json; indent=4"
       register: netbox_status
 
- - name: Display NetBox and Server Information
+    - name: Display NetBox and Server Information
       debug:
         msg:
           - "Successfully connected to NetBox!"
           - "NetBox Version: {{ netbox_status.json['netbox-version'] }}"
-          - "Server IP Addresses: {{ ansible_all_ipv4_addresses | join(', ') }}"
-          - "Running on Hostname: {{ inventory_hostname }}"
+          - "Server IP: {{ ansible_all_ipv4_addresses | select('match', '10.201.*') | first }}"
