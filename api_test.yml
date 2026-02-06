@@ -3,7 +3,7 @@
   hosts: all
   gather_facts: no
   tasks:
-    - name: Get NetBox Status from API
+    - name: Get NetBox Status from API (Or checking if the status is 200 ok)
       ansible.builtin.uri:
         # Use the exact URL and Port from your curl command
         url: "http://10.201.106.107:8000/api/status/"
