@@ -1,3 +1,7 @@
 ---
 plugin: netbox.netbox.nb_inventory
 validate_certs: false
+config_context: false
+# Use 'ansible_host' to tell Ansible which IP to use for the devices it finds
+query_filters:
+  - status: 'active'
