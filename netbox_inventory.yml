@@ -2,6 +2,15 @@
 plugin: netbox.netbox.nb_inventory
 validate_certs: false
 config_context: false
-# Use 'ansible_host' to tell Ansible which IP to use for the devices it finds
+# Filter for active devices only
 query_filters:
   - status: 'active'
+
+# This is the "Magic" part:
+# It creates groups in AWX based on the 'Role' you set in NetBox
+group_by:
+  - device_roles
+  - platforms
+
+# This ensures the Primary IP from NetBox is used as the 'ansible_host'
+ansible_host: primary_ip
