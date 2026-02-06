@@ -1,8 +1,12 @@
 ---
 - name: Test NetBox API Connection
   hosts: all
-  gather_facts: yes
+  gather_facts: no  # We will get the IP manually to avoid the "undefined" error
   tasks:
+    - name: Get Server IP manually
+      ansible.builtin.shell: "hostname -I | awk '{print $1}'"
+      register: server_ip_result
+
     - name: Get NetBox Status from API
       ansible.builtin.uri:
         url: "http://10.201.6.37:8000/api/status/"
@@ -20,4 +24,4 @@
         msg:
           - "Successfully connected to NetBox!"
           - "NetBox Version: {{ netbox_status.json['netbox-version'] }}"
-          - "Server IP: {{ ansible_all_ipv4_addresses | select('match', '10.201.*') | first }}"
+          - "Server IP Address: {{ server_ip_result.stdout }}"
