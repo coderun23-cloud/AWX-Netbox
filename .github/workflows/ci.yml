@@ -1,0 +1,42 @@
+name: AWX End-to-End CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Python and Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          pip install ansible ansible-lint
+
+      - name: Ansible Syntax Check
+        run: |
+          if [ -d "playbooks" ]; then
+            for file in playbooks/*.yml; do
+              ansible-playbook --syntax-check $file || exit 1
+            done
+          fi
+
+      - name: Run Ansible Lint
+        run: ansible-lint || true
+
+      - name: Trigger AWX Workflow Template
+        if: github.ref == 'refs/heads/main'
+        run: |
+          curl -k -X POST "${AWX_URL}/api/v2/workflow_job_templates/${WORKFLOW_ID}/launch/" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${AWX_TOKEN}"
+        env:
+          AWX_URL: ${{ secrets.AWX_URL }}
+          AWX_TOKEN: ${{ secrets.AWX_TOKEN }}
+          WORKFLOW_ID: ${{ secrets.WORKFLOW_ID }}
