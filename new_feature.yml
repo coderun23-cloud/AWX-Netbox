@@ -30,7 +30,7 @@
 
     - name: 3. DEBUG - Show API Results
       ansible.builtin.debug:
-        msg: 
+        msg:
           - "Searching NetBox for: {{ inventory_hostname }}"
           - "Found Devices Count: {{ device_query.json.count }}"
 
@@ -46,7 +46,7 @@
       ansible.builtin.debug:
         msg:
           - "============================================"
-          - "       INFRASTRUCTURE FOUNDATION REPORT      "
+          - "       DEVICE REPORT      "
           - "============================================"
           - "DEVICE CAPTURE:"
           - "  Target Name:     {{ inventory_hostname }}"
